@@ -2,13 +2,16 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="format-detection" content="telephone=no">
 <title>8-Max NLHE · 职业级剥削策略</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; background: #0b0b0b; color: #eee; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 10px; user-select: none; }
+  body { font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; background: #0b0b0b; color: #eee; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 10px; padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left); user-select: none; -webkit-overflow-scrolling: touch; overscroll-behavior: none; }
   h1 { font-size: 18px; color: #d4af37; margin: 6px 0; letter-spacing: 2px; }
-  .setup-bar { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; justify-content: center; background: #161616; border: 1px solid #333; border-radius: 10px; padding: 10px 16px; margin: 6px 0; width: 1400px; max-width: 100%; }
+  .setup-bar { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; justify-content: center; background: #161616; border: 1px solid #333; border-radius: 10px; padding: 10px 16px; margin: 6px 0; width: 100%; max-width: 100%; }
   .setup-item { display: flex; align-items: center; gap: 5px; }
   .setup-item label { font-size: 12px; color: #aaa; }
   .setup-item select, .setup-item input { background: #0e0e0e; border: 1px solid #444; color: #eee; border-radius: 5px; padding: 5px 8px; font-size: 12px; width: 72px; text-align: center; outline: none; }
@@ -20,8 +23,8 @@
   .btn-ai:hover { filter: brightness(1.2); }
   .btn-ai:disabled { opacity: .5; cursor: not-allowed; }
   .btn-red { background: #c62828; color: #fff; border: none; padding: 10px 20px; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; }
-  .key-bar { display: flex; gap: 8px; align-items: center; justify-content: center; background: #1a1a2e; border: 1px solid #7c3aed; border-radius: 8px; padding: 10px 14px; margin: 4px 0; width: 1400px; max-width: 100%; flex-wrap: wrap; }
-  .key-bar input { flex: 1; min-width: 400px; background: #0e0e0e; border: 1px solid #444; color: #eee; border-radius: 5px; padding: 8px 12px; font-size: 13px; outline: none; font-family: monospace; }
+  .key-bar { display: flex; gap: 8px; align-items: center; justify-content: center; background: #1a1a2e; border: 1px solid #7c3aed; border-radius: 8px; padding: 10px 14px; margin: 4px 0; width: 100%; max-width: 100%; flex-wrap: wrap; }
+  .key-bar input { flex: 1; min-width: 200px; width: 100%; background: #0e0e0e; border: 1px solid #444; color: #eee; border-radius: 5px; padding: 8px 12px; font-size: 13px; outline: none; font-family: monospace; }
   .key-bar input:focus { border-color: #7c3aed; }
   .key-bar label { font-size: 12px; color: #aaa; white-space: nowrap; }
   #keyStatus { width: 100%; text-align: center; font-size: 12px; color: #a78bfa; margin-top: 4px; min-height: 16px; }
@@ -36,7 +39,7 @@
   .auto-switch.on .txt { color:#10b981; }
 
   /* ============ 对手数据面板（可折叠） ============ */
-  .opp-data-bar { background: #161616; border: 1px solid #d4af37; border-radius: 10px; margin: 6px 0; width: 1400px; max-width: 100%; overflow: hidden; }
+  .opp-data-bar { background: #161616; border: 1px solid #d4af37; border-radius: 10px; margin: 6px 0; width: 100%; max-width: 100%; overflow: hidden; }
   .opp-data-header { display: flex; align-items: center; gap: 10px; padding: 10px 16px; cursor: pointer; user-select: none; transition: background .2s; }
   .opp-data-header:hover { background: #1f1f1f; }
   .opp-data-header .title { font-size: 13px; color: #d4af37; font-weight: 800; }
@@ -47,7 +50,7 @@
   .opp-data-toolbar { display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
 
   /* 对手类型卡片 */
-  .opp-type-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); gap: 10px; }
+  .opp-type-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 10px; }
   .opp-type-card { background: #101010; border: 1px solid #333; border-radius: 10px; padding: 10px 12px; transition: border-color .2s; }
   .opp-type-card:hover { border-color: #555; }
   .opp-type-card.opp-card-inactive { opacity: .35; filter: grayscale(.7); }
@@ -73,9 +76,26 @@
   .opp-row-inactive { opacity: 0.35; }
   .opp-seat-cell { font-weight: 700; color: #d4af37; font-size: 11px; }
 
-  .main-container { display: flex; gap: 14px; align-items: flex-start; justify-content: center; margin: 4px 0; }
+  .main-container { display: flex; flex-direction: column; gap: 14px; align-items: center; justify-content: center; margin: 4px 0; width: 100%; }
 
-  .card-picker-side { background: #1a1a1a; border: 2px solid #444; border-radius: 14px; padding: 16px; display: none; width: 500px; flex-shrink: 0; }
+  /* ⭐ 修改：选牌器改为浮动弹窗，适应 iPad */
+  .card-picker-side { 
+    background: #1a1a1a; 
+    border: 2px solid #d4af37; 
+    border-radius: 14px; 
+    padding: 16px; 
+    display: none; 
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 9999;
+    width: 90vw;
+    max-width: 460px;
+    max-height: 85vh;
+    overflow-y: auto;
+    box-shadow: 0 0 0 9999px rgba(0,0,0,0.85);
+  }
   .card-picker-title { font-size: 17px; font-weight: 800; color: #d4af37; margin-bottom: 12px; text-align: center; }
   .card-grid-side { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
   .suit-col { display: flex; flex-direction: column; gap: 5px; }
@@ -87,8 +107,19 @@
   .card-btn:disabled { background: #111; cursor: not-allowed; opacity: 0.3; }
   .card-btn.selected { border-color: #4fc3f7; box-shadow: 0 0 12px rgba(79,195,247,.6); }
 
-  .right-col { display: flex; flex-direction: column; align-items: center; }
-  .table-wrap { position: relative; width: 860px; height: 540px; margin: 0; }
+  .right-col { display: flex; flex-direction: column; align-items: center; width: 100%; }
+
+  /* ⭐ 新增：横向滚动容器，防止牌桌在 iPad 竖屏下被截断 */
+  .table-scroll-container {
+    width: 100%;
+    overflow-x: auto;
+    display: flex;
+    justify-content: center;
+    padding-bottom: 10px;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .table-wrap { position: relative; width: 860px; height: 540px; margin: 0; flex-shrink: 0; }
   .pt { width: 100%; height: 100%; border-radius: 250px; background: radial-gradient(ellipse at center, #1a7a52 0%, #0f5c3a 50%, #093d26 100%); border: 16px solid #3b2214; box-shadow: 0 0 0 5px #1a0e06, 0 12px 50px rgba(0,0,0,.9), inset 0 0 100px rgba(0,0,0,.5); position: relative; }
   .table-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); color: rgba(255,255,255,.05); font-size: 26px; font-weight: 900; letter-spacing: 6px; pointer-events: none; z-index: 0; }
   .seat { position: absolute; width: 68px; height: 68px; border-radius: 50%; background: linear-gradient(145deg, #2a2a2a, #1a1a1a); border: 3px solid #555; display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: pointer; transition: .3s; z-index: 5; }
@@ -150,8 +181,8 @@
   .raise-input-row { display: flex; gap: 6px; align-items: center; }
   .raise-input { flex: 1; padding: 7px 8px; border: 1px solid #555; border-radius: 6px; background: #1a1a1a; color: #66bb6a; font-size: 14px; font-weight: 700; text-align: center; outline: none; }
   .raise-confirm { padding: 7px 14px; border: none; border-radius: 6px; background: #2e7d32; color: #fff; font-size: 13px; font-weight: 700; cursor: pointer; }
-  .btn-row { display: flex; gap: 8px; justify-content: center; margin: 8px 0; flex-wrap: wrap; align-items:center; }
-  .action-log { margin-top: 8px; max-height: 130px; overflow-y: auto; background: #111; border-radius: 8px; padding: 8px 12px; font-size: 12px; line-height: 1.9; border: 1px solid #222; display: none; width: 860px; }
+  .btn-row { display: flex; gap: 8px; justify-content: center; margin: 8px 0; flex-wrap: wrap; align-items:center; width: 100%; }
+  .action-log { margin-top: 8px; max-height: 130px; overflow-y: auto; background: #111; border-radius: 8px; padding: 8px 12px; font-size: 12px; line-height: 1.9; border: 1px solid #222; display: none; width: 100%; max-width: 860px; }
   .log-fold { color: #3b82f6; } .log-call { color: #f59e0b; } .log-raise { color: #ef4444; } .log-check { color: #10b981; } .log-info { color: #888; }
   .poker-card { width: 40px; height: 58px; background: linear-gradient(145deg, #1a1a1a, #2d2d2d); border-radius: 6px; border: 1px solid #555; position: relative; display: inline-flex; justify-content: center; align-items: center; box-shadow: 2px 3px 8px rgba(0,0,0,.7); flex-shrink: 0; }
   .poker-card .card-corner { position: absolute; font-size: 11px; font-weight: 900; line-height: 1; }
@@ -166,12 +197,12 @@
   .poker-card.mini .card-rank { font-size: 9px; } .poker-card.mini .card-suit { font-size: 7px; } .poker-card.mini .card-center { font-size: 16px; }
   .poker-card.back { background: rgba(20,20,20,.6); border: 2px dashed rgba(255,255,255,.2); }
   .poker-card.back::after { content: '?'; color: rgba(255,255,255,.3); font-size: 14px; }
-  .opp-note { font-size: 11px; color: #ff8c42; background: rgba(255,140,66,.08); padding: 6px 12px; border-radius: 6px; border-left: 3px solid #ff8c42; margin: 6px 0; width: 1400px; max-width: 100%; text-align: center; }
-  .ai-advice { margin-top: 8px; width: 860px; background: linear-gradient(135deg, #1a1a2e, #141428); border: 2px solid #7c3aed; border-radius: 10px; padding: 14px 18px; display: none; }
+  .opp-note { font-size: 11px; color: #ff8c42; background: rgba(255,140,66,.08); padding: 6px 12px; border-radius: 6px; border-left: 3px solid #ff8c42; margin: 6px 0; width: 100%; text-align: center; }
+  .ai-advice { margin-top: 8px; width: 100%; max-width: 860px; background: linear-gradient(135deg, #1a1a2e, #141428); border: 2px solid #7c3aed; border-radius: 10px; padding: 14px 18px; display: none; }
   .ai-advice-title { font-size: 13px; font-weight: 800; color: #a78bfa; margin-bottom: 8px; display:flex; justify-content:space-between; align-items:center; }
   .ai-advice-title .live-dot { font-size:10px; color:#10b981; font-weight:600; display:none; }
   .ai-advice-title .live-dot.on { display:inline-block; }
-  .ai-advice-content { font-size: 26px; line-height: 1.5; color: #d4af37; white-space: pre-wrap; font-weight: 900; text-align: center; }
+  .ai-advice-content { font-size: 20px; line-height: 1.5; color: #d4af37; white-space: pre-wrap; font-weight: 900; text-align: center; }
 
   .waiting-overlay { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); z-index: 30; background: linear-gradient(135deg, #1a1a2e, #141428); border: 3px solid #d4af37; border-radius: 14px; padding: 24px 32px; text-align: center; box-shadow: 0 0 40px rgba(212,175,55,.5); display: none; }
   .waiting-overlay .wo-title { font-size: 20px; font-weight: 900; color: #d4af37; margin-bottom: 10px; }
@@ -180,7 +211,7 @@
 </head>
 <body>
 <h1>♦ 8-Max NLHE · 职业级剥削策略 ♠</h1>
-<div class="opp-note">⚔️ 对手模型：真实线上玩家 · 点选对手类型（松凶/紧凶/职业赢家/疯狂玩家/可剥削…），轮到你行动时 DeepSeek 自动给出建议（流式实时输出）｜💰 座位上的黄色数字为筹码，可直接修改，每局自动随注码增减</div>
+<div class="opp-note">⚔️ 对手模型：真实线上玩家 · 点选对手类型（松凶/紧凶/职业赢家/疯狂玩家/可剥削…），轮到你行动时 DeepSeek 自动给出建议（流式实时输出）｜🟟 座位上的黄色数字为筹码，可直接修改，每局自动随注码增减</div>
 
 <div class="key-bar">
   <label>DeepSeek API Key</label>
@@ -197,7 +228,7 @@
 <!-- ============ 对手数据面板（可折叠） ============ -->
 <div class="opp-data-bar">
   <div class="opp-data-header" onclick="toggleOppPanel()">
-    <span class="title">📊 对手类型设置</span>
+    <span class="title">🟟 对手类型设置</span>
     <span class="hint">（点击展开/收起 · 直接点选每个座位的玩家类型，一键设定全部 13 项数据）</span>
     <span class="toggle-icon" id="oppToggleIcon">▼ 展开</span>
   </div>
@@ -270,105 +301,107 @@
   </div>
 
   <div class="right-col">
-    <div class="table-wrap">
-      <div class="pt">
-        <div class="table-text">8-MAX NLHE</div>
+    <div class="table-scroll-container">
+      <div class="table-wrap">
+        <div class="pt">
+          <div class="table-text">8-MAX NLHE</div>
 
-        <div class="seat pos-0" id="seat-0" onclick="clickSeat(0)">
-          <span class="seat-name">玩家</span><span class="seat-role" id="role-0">—</span>
-          <input type="number" class="seat-stack-input" id="stackInput-0" value="40" step="0.5" min="0"
-                 onclick="event.stopPropagation()" onchange="onStackInputChange(0,this.value)">
-          <div class="seat-cards" id="cards-0"></div><div class="seat-label" id="label-0"></div>
-        </div>
-
-        <div class="seat pos-1" id="seat-1" onclick="clickSeat(1)">
-          <span class="seat-name">座位1</span><span class="seat-role" id="role-1">—</span>
-          <input type="number" class="seat-stack-input" id="stackInput-1" value="40" step="0.5" min="0"
-                 onclick="event.stopPropagation()" onchange="onStackInputChange(1,this.value)">
-          <div class="seat-cards" id="cards-1"></div><div class="seat-label" id="label-1"></div>
-          <div class="seat-toggle" onclick="toggleSeatActive(1)">✕</div>
-        </div>
-
-        <div class="seat pos-2" id="seat-2" onclick="clickSeat(2)">
-          <span class="seat-name">座位2</span><span class="seat-role" id="role-2">—</span>
-          <input type="number" class="seat-stack-input" id="stackInput-2" value="40" step="0.5" min="0"
-                 onclick="event.stopPropagation()" onchange="onStackInputChange(2,this.value)">
-          <div class="seat-cards" id="cards-2"></div><div class="seat-label" id="label-2"></div>
-          <div class="seat-toggle" onclick="toggleSeatActive(2)">✕</div>
-        </div>
-
-        <div class="seat pos-3" id="seat-3" onclick="clickSeat(3)">
-          <span class="seat-name">座位3</span><span class="seat-role" id="role-3">—</span>
-          <input type="number" class="seat-stack-input" id="stackInput-3" value="40" step="0.5" min="0"
-                 onclick="event.stopPropagation()" onchange="onStackInputChange(3,this.value)">
-          <div class="seat-cards" id="cards-3"></div><div class="seat-label" id="label-3"></div>
-          <div class="seat-toggle" onclick="toggleSeatActive(3)">✕</div>
-        </div>
-
-        <div class="seat pos-4" id="seat-4" onclick="clickSeat(4)">
-          <span class="seat-name">座位4</span><span class="seat-role" id="role-4">—</span>
-          <input type="number" class="seat-stack-input" id="stackInput-4" value="40" step="0.5" min="0"
-                 onclick="event.stopPropagation()" onchange="onStackInputChange(4,this.value)">
-          <div class="seat-cards" id="cards-4"></div><div class="seat-label" id="label-4"></div>
-          <div class="seat-toggle" onclick="toggleSeatActive(4)">✕</div>
-        </div>
-
-        <div class="seat pos-5" id="seat-5" onclick="clickSeat(5)">
-          <span class="seat-name">座位5</span><span class="seat-role" id="role-5">—</span>
-          <input type="number" class="seat-stack-input" id="stackInput-5" value="40" step="0.5" min="0"
-                 onclick="event.stopPropagation()" onchange="onStackInputChange(5,this.value)">
-          <div class="seat-cards" id="cards-5"></div><div class="seat-label" id="label-5"></div>
-          <div class="seat-toggle" onclick="toggleSeatActive(5)">✕</div>
-        </div>
-
-        <div class="seat pos-6" id="seat-6" onclick="clickSeat(6)">
-          <span class="seat-name">座位6</span><span class="seat-role" id="role-6">—</span>
-          <input type="number" class="seat-stack-input" id="stackInput-6" value="40" step="0.5" min="0"
-                 onclick="event.stopPropagation()" onchange="onStackInputChange(6,this.value)">
-          <div class="seat-cards" id="cards-6"></div><div class="seat-label" id="label-6"></div>
-          <div class="seat-toggle" onclick="toggleSeatActive(6)">✕</div>
-        </div>
-
-        <div class="seat pos-7" id="seat-7" onclick="clickSeat(7)">
-          <span class="seat-name">座位7</span><span class="seat-role" id="role-7">—</span>
-          <input type="number" class="seat-stack-input" id="stackInput-7" value="40" step="0.5" min="0"
-                 onclick="event.stopPropagation()" onchange="onStackInputChange(7,this.value)">
-          <div class="seat-cards" id="cards-7"></div><div class="seat-label" id="label-7"></div>
-          <div class="seat-toggle" onclick="toggleSeatActive(7)">✕</div>
-        </div>
-
-        <div class="center-area">
-          <div class="street-label" id="streetLabel">选择庄位开始</div>
-          <div class="pot-display" id="potDisplay">底池: 0 BB</div>
-          <div class="community-cards" id="communityCards"></div>
-        </div>
-        <div class="action-panel" id="actionPanel">
-          <div class="ap-title" id="apTitle">行动</div>
-          <div class="ap-info" id="apInfo"></div>
-          <div class="ap-grid" id="apGrid"></div>
-          <div class="raise-area" id="raiseArea">
-            <div class="raise-presets" id="raisePresets"></div>
-            <div class="raise-input-row"><input type="number" class="raise-input" id="raiseInput" min="0" step="0.1"><button class="raise-confirm" onclick="confirmRaise()">确认加注</button></div>
-            <div class="ap-info" id="raiseMinMax"></div>
+          <div class="seat pos-0" id="seat-0" onclick="clickSeat(0)">
+            <span class="seat-name">玩家</span><span class="seat-role" id="role-0">—</span>
+            <input type="number" class="seat-stack-input" id="stackInput-0" value="40" step="0.5" min="0"
+                   onclick="event.stopPropagation()" onchange="onStackInputChange(0,this.value)">
+            <div class="seat-cards" id="cards-0"></div><div class="seat-label" id="label-0"></div>
           </div>
-        </div>
-        <div class="waiting-overlay" id="waitingOverlay">
-          <div class="wo-title">🎴 轮到你行动</div>
-          <div class="wo-sub">请在左侧选择你的两张手牌</div>
+
+          <div class="seat pos-1" id="seat-1" onclick="clickSeat(1)">
+            <span class="seat-name">座位1</span><span class="seat-role" id="role-1">—</span>
+            <input type="number" class="seat-stack-input" id="stackInput-1" value="40" step="0.5" min="0"
+                   onclick="event.stopPropagation()" onchange="onStackInputChange(1,this.value)">
+            <div class="seat-cards" id="cards-1"></div><div class="seat-label" id="label-1"></div>
+            <div class="seat-toggle" onclick="toggleSeatActive(1)">✕</div>
+          </div>
+
+          <div class="seat pos-2" id="seat-2" onclick="clickSeat(2)">
+            <span class="seat-name">座位2</span><span class="seat-role" id="role-2">—</span>
+            <input type="number" class="seat-stack-input" id="stackInput-2" value="40" step="0.5" min="0"
+                   onclick="event.stopPropagation()" onchange="onStackInputChange(2,this.value)">
+            <div class="seat-cards" id="cards-2"></div><div class="seat-label" id="label-2"></div>
+            <div class="seat-toggle" onclick="toggleSeatActive(2)">✕</div>
+          </div>
+
+          <div class="seat pos-3" id="seat-3" onclick="clickSeat(3)">
+            <span class="seat-name">座位3</span><span class="seat-role" id="role-3">—</span>
+            <input type="number" class="seat-stack-input" id="stackInput-3" value="40" step="0.5" min="0"
+                   onclick="event.stopPropagation()" onchange="onStackInputChange(3,this.value)">
+            <div class="seat-cards" id="cards-3"></div><div class="seat-label" id="label-3"></div>
+            <div class="seat-toggle" onclick="toggleSeatActive(3)">✕</div>
+          </div>
+
+          <div class="seat pos-4" id="seat-4" onclick="clickSeat(4)">
+            <span class="seat-name">座位4</span><span class="seat-role" id="role-4">—</span>
+            <input type="number" class="seat-stack-input" id="stackInput-4" value="40" step="0.5" min="0"
+                   onclick="event.stopPropagation()" onchange="onStackInputChange(4,this.value)">
+            <div class="seat-cards" id="cards-4"></div><div class="seat-label" id="label-4"></div>
+            <div class="seat-toggle" onclick="toggleSeatActive(4)">✕</div>
+          </div>
+
+          <div class="seat pos-5" id="seat-5" onclick="clickSeat(5)">
+            <span class="seat-name">座位5</span><span class="seat-role" id="role-5">—</span>
+            <input type="number" class="seat-stack-input" id="stackInput-5" value="40" step="0.5" min="0"
+                   onclick="event.stopPropagation()" onchange="onStackInputChange(5,this.value)">
+            <div class="seat-cards" id="cards-5"></div><div class="seat-label" id="label-5"></div>
+            <div class="seat-toggle" onclick="toggleSeatActive(5)">✕</div>
+          </div>
+
+          <div class="seat pos-6" id="seat-6" onclick="clickSeat(6)">
+            <span class="seat-name">座位6</span><span class="seat-role" id="role-6">—</span>
+            <input type="number" class="seat-stack-input" id="stackInput-6" value="40" step="0.5" min="0"
+                   onclick="event.stopPropagation()" onchange="onStackInputChange(6,this.value)">
+            <div class="seat-cards" id="cards-6"></div><div class="seat-label" id="label-6"></div>
+            <div class="seat-toggle" onclick="toggleSeatActive(6)">✕</div>
+          </div>
+
+          <div class="seat pos-7" id="seat-7" onclick="clickSeat(7)">
+            <span class="seat-name">座位7</span><span class="seat-role" id="role-7">—</span>
+            <input type="number" class="seat-stack-input" id="stackInput-7" value="40" step="0.5" min="0"
+                   onclick="event.stopPropagation()" onchange="onStackInputChange(7,this.value)">
+            <div class="seat-cards" id="cards-7"></div><div class="seat-label" id="label-7"></div>
+            <div class="seat-toggle" onclick="toggleSeatActive(7)">✕</div>
+          </div>
+
+          <div class="center-area">
+            <div class="street-label" id="streetLabel">选择庄位开始</div>
+            <div class="pot-display" id="potDisplay">底池: 0 BB</div>
+            <div class="community-cards" id="communityCards"></div>
+          </div>
+          <div class="action-panel" id="actionPanel">
+            <div class="ap-title" id="apTitle">行动</div>
+            <div class="ap-info" id="apInfo"></div>
+            <div class="ap-grid" id="apGrid"></div>
+            <div class="raise-area" id="raiseArea">
+              <div class="raise-presets" id="raisePresets"></div>
+              <div class="raise-input-row"><input type="number" class="raise-input" id="raiseInput" min="0" step="0.1"><button class="raise-confirm" onclick="confirmRaise()">确认加注</button></div>
+              <div class="ap-info" id="raiseMinMax"></div>
+            </div>
+          </div>
+          <div class="waiting-overlay" id="waitingOverlay">
+            <div class="wo-title">🟟 轮到你行动</div>
+            <div class="wo-sub">请在左侧选择你的两张手牌</div>
+          </div>
         </div>
       </div>
     </div>
 
     <div class="ai-advice" id="aiAdvice">
       <div class="ai-advice-title">
-        <span id="aiAdviceTitle">🤖 DeepSeek 职业级建议</span>
+        <span id="aiAdviceTitle">🟟 DeepSeek 职业级建议</span>
         <span class="live-dot" id="liveDot">● 实时流式输出中</span>
       </div>
       <div class="ai-advice-content" id="aiAdviceContent"></div>
     </div>
 
     <div class="btn-row">
-      <button class="btn-ai" id="aiBtn" onclick="getAIAdvice(true)">🤖 立即获取 DeepSeek 建议</button>
+      <button class="btn-ai" id="aiBtn" onclick="getAIAdvice(true)">🟟 立即获取 DeepSeek 建议</button>
     </div>
 
     <div class="action-log" id="actionLog"></div>
@@ -1277,7 +1310,7 @@ function renderOppTypeGrid(){
         <span class="opp-type-badge" style="background:${info.color}22;color:${info.color};border:1px solid ${info.color}66;">${info.name}</span>
       </div>
       <div class="opp-type-tags">${tags}</div>
-      <div class="opp-card-tip">💡 ${info.tip}</div>
+      <div class="opp-card-tip">🟟 ${info.tip}</div>
     `;
     wrap.appendChild(card);
   }
@@ -1535,10 +1568,10 @@ async function getAIAdvice(manual){
 
   AI_RUNNING = true;
   const mySeq = ++ADVICE_REQUEST_SEQ;
-  if (btn) { btn.disabled = true; btn.textContent = '🤖 思考中...'; }
+  if (btn) { btn.disabled = true; btn.textContent = '🟟 思考中...'; }
 
   box.style.display = 'block';
-  title.textContent = '🤖 DeepSeek 职业级建议' + (manual ? '' : '（自动）');
+  title.textContent = '🟟 DeepSeek 职业级建议' + (manual ? '' : '（自动）');
   title.style.color = '#a78bfa';
   box.style.borderColor = '#7c3aed';
   content.innerHTML = '<div style="font-size:20px;color:#a78bfa;font-weight:600;">⏳ 正在连接 DeepSeek 流式接口...</div>';
@@ -1593,7 +1626,7 @@ async function getAIAdvice(manual){
         fullText += delta;
         if (firstChunk) {
           firstChunk = false;
-          title.textContent = '🤖 DeepSeek 正在输出...' + (manual ? '' : '（自动）');
+          title.textContent = '🟟 DeepSeek 正在输出...' + (manual ? '' : '（自动）');
         }
         content.innerHTML =
           '<div style="font-size:20px;color:#d4af37;font-weight:800;text-align:left;white-space:pre-wrap;line-height:1.6;">' +
@@ -1635,7 +1668,7 @@ async function getAIAdvice(manual){
   } finally {
     if(mySeq === ADVICE_REQUEST_SEQ){
       if (liveDot) liveDot.classList.remove('on');
-      if (btn) { btn.disabled = false; btn.textContent = '🤖 立即获取 DeepSeek 建议'; }
+      if (btn) { btn.disabled = false; btn.textContent = '🟟 立即获取 DeepSeek 建议'; }
       AI_RUNNING = false;
     }
   }
@@ -1646,11 +1679,11 @@ function showAdviceBox(main, detail, source){
   const title = document.getElementById('aiAdviceTitle');
   const content = document.getElementById('aiAdviceContent');
   box.style.display = 'block';
-  title.textContent = '🤖 DeepSeek 职业级建议';
+  title.textContent = '🟟 DeepSeek 职业级建议';
   title.style.color = '#a78bfa';
   box.style.borderColor = '#7c3aed';
   content.innerHTML =
-    '<div style="font-size:26px;color:#d4af37;font-weight:900;text-align:center;">' + escapeHtml(main) + '</div>' +
+    '<div style="font-size:20px;color:#d4af37;font-weight:900;text-align:center;">' + escapeHtml(main) + '</div>' +
     (detail ? '<div style="font-size:12px;color:#888;font-weight:400;margin-top:8px;white-space:pre-wrap;text-align:left;line-height:1.6;">' + escapeHtml(detail) + '</div>' : '');
 }
 
@@ -1703,7 +1736,7 @@ function resetAll(){
 loadApiKey();
 renderOppPanel();
 updateUI();
-console.log('8-Max NLHE · 职业级剥削策略（自动建议 + 流式输出 + 一键类型 + 底池比例下注 + 筹码自动增减）已加载');
+console.log('8-Max NLHE · 职业级剥削策略（已适配 iPad 全屏/横向滚动/弹出选牌器）已加载');
 </script>
 </body>
 </html>
